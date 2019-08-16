@@ -1,38 +1,91 @@
 <template>
   <div class="app-container">
-
     <!-- 查询和其他操作 -->
     <div class="filter-container">
-      <el-input v-model="listQuery.name" clearable class="filter-item" style="width: 200px;" placeholder="请输入角色名称"/>
-      <el-button v-permission="['GET /admin/role/list']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
-      <el-button v-permission="['POST /admin/role/create']" class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">添加</el-button>
+      <el-input
+        v-model="listQuery.name"
+        clearable
+        class="filter-item"
+        style="width: 200px;"
+        placeholder="请输入角色名称"
+      />
+      <el-button
+        v-permission="['GET /admin/role/list']"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-search"
+        @click="handleFilter"
+      >查找</el-button>
+      <el-button
+        v-permission="['POST /admin/role/create']"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-edit"
+        @click="handleCreate"
+      >添加</el-button>
     </div>
 
     <!-- 查询结果 -->
-    <el-table v-loading="listLoading" :data="list" element-loading-text="正在查询中。。。" border fit highlight-current-row>
-      <el-table-column align="center" label="角色名称" prop="name" sortable/>
+    <el-table
+      v-loading="listLoading"
+      :data="list"
+      element-loading-text="正在查询中。。。"
+      border
+      fit
+      highlight-current-row
+    >
+      <el-table-column align="center" label="角色名称" prop="name" sortable />
 
-      <el-table-column align="center" label="说明" prop="desc"/>
+      <el-table-column align="center" label="说明" prop="desc" />
 
       <el-table-column align="center" label="操作" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button v-permission="['POST /admin/role/update']" type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
-          <el-button v-permission="['POST /admin/role/delete']" type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
-          <el-button v-permission="['GET /admin/role/permissions']" type="primary" size="mini" @click="handlePermission(scope.row)">授权</el-button>
+          <el-button
+            v-permission="['POST /admin/role/update']"
+            type="primary"
+            size="mini"
+            @click="handleUpdate(scope.row)"
+          >编辑</el-button>
+          <el-button
+            v-permission="['POST /admin/role/delete']"
+            type="danger"
+            size="mini"
+            @click="handleDelete(scope.row)"
+          >删除</el-button>
+          <el-button
+            v-permission="['GET /admin/role/permissions']"
+            type="primary"
+            size="mini"
+            @click="handlePermission(scope.row)"
+          >授权</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.limit"
+      @pagination="getList"
+    />
 
     <!-- 添加或修改对话框 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="dataForm" status-icon label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="dataForm"
+        status-icon
+        label-position="left"
+        label-width="100px"
+        style="width: 400px; margin-left:50px;"
+      >
         <el-form-item label="角色名称" prop="name">
-          <el-input v-model="dataForm.name"/>
+          <el-input v-model="dataForm.name" />
         </el-form-item>
         <el-form-item label="说明" prop="desc">
-          <el-input v-model="dataForm.desc"/>
+          <el-input v-model="dataForm.desc" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -50,7 +103,8 @@
         :default-checked-keys="assignedPermissions"
         show-checkbox
         node-key="id"
-        highlight-current>
+        highlight-current
+      >
         <span slot-scope="{ node, data }" class="custom-tree-node">
           <span>{{ data.label }}</span>
           <el-tag v-if="data.api" type="success" size="mini">{{ data.api }}</el-tag>
@@ -61,12 +115,18 @@
         <el-button type="primary" @click="updatePermission">确定</el-button>
       </div>
     </el-dialog>
-
   </div>
 </template>
 
 <script>
-import { listRole, createRole, updateRole, deleteRole, getPermission, updatePermission } from '@/api/role';
+import {
+  listRole,
+  createRole,
+  updateRole,
+  deleteRole,
+  getPermission,
+  updatePermission
+} from '@/api/role';
 import Pagination from '@/components/Pagination';
 export default {
   name: 'Role',
@@ -95,9 +155,7 @@ export default {
         create: '创建'
       },
       rules: {
-        name: [
-          { required: true, message: '角色名称不能为空', trigger: 'blur' }
-        ]
+        name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }]
       },
       permissionDialogFormVisible: false,
       systemPermissions: null,
@@ -221,11 +279,10 @@ export default {
     handlePermission(row) {
       this.permissionDialogFormVisible = true;
       this.permissionForm.roleId = row.id;
-      getPermission({ roleId: row.id })
-        .then(response => {
-          this.systemPermissions = response.data.data.systemPermissions;
-          this.assignedPermissions = response.data.data.assignedPermissions;
-        });
+      getPermission({ roleId: row.id }).then(response => {
+        this.systemPermissions = response.data.data.systemPermissions;
+        this.assignedPermissions = response.data.data.assignedPermissions;
+      });
     },
     updatePermission() {
       this.permissionForm.permissions = this.$refs.tree.getCheckedKeys(true);
