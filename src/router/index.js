@@ -78,102 +78,102 @@ export default new Router({
 });
 
 export const asyncRouterMap = [
-  {
-    path: '/coin',
-    component: Layout,
-    redirect: 'noredirect',
-    alwaysShow: true,
-    name: 'coinManage',
-    meta: {
-      title: '充提管理',
-      icon: 'chart'
-    },
-    children: [
-      {
-        path: 'coin',
-        component: () => import('@/views/coin/coinReview'),
-        name: 'coin',
-        meta: {
-          perms: ['GET /admin/user/list'],
-          title: '提币审核',
-          noCache: true
-        }
-      },
-      {
-        path: 'coinHistory',
-        component: () => import('@/views/coin/coinHistory'),
-        name: 'coinHistory',
-        meta: {
-          perms: ['GET /admin/address/list'],
-          title: '历史提币',
-          noCache: true
-        }
-      },
-      {
-        path: 'coinUnusal',
-        component: () => import('@/views/coin/coinUnusal'),
-        name: 'coinUnusal',
-        meta: {
-          perms: ['GET /admin/collect/list'],
-          title: '异常提币',
-          noCache: true
-        }
-      }
-    ]
-  },
-  {
-    path: '/trade',
-    component: Layout,
-    redirect: 'noredirect',
-    alwaysShow: true,
-    name: 'tradeManage',
-    meta: {
-      title: '法币交易',
-      icon: 'chart'
-    },
-    children: [
-      {
-        path: 'trade',
-        component: () => import('@/views/trade/tradeReview'),
-        name: 'trade',
-        meta: {
-          perms: ['GET /admin/user/list'],
-          title: '提币审核',
-          noCache: true
-        }
-      },
-      {
-        path: 'tradeHistory',
-        component: () => import('@/views/trade/tradeHistory'),
-        name: 'tradeHistory',
-        meta: {
-          perms: ['GET /admin/address/list'],
-          title: '历史订单',
-          noCache: true
-        }
-      },
-      {
-        path: 'tradeUnusal',
-        component: () => import('@/views/trade/tradeUnusal'),
-        name: 'tradeUnusal',
-        meta: {
-          perms: ['GET /admin/collect/list'],
-          title: '异常订单',
-          noCache: true
-        }
-      },
-      {
-        path: 'tradeInformation',
-        component: () => import('@/views/trade/tradeInformation'),
-        name: 'tradeInformation',
-        meta: {
-          perms: ['GET /admin/collect/list'],
-          title: '支付信息',
-          noCache: true
-        }
-      }
-    ]
-  },
+  // {
+  //   path: '/coin',
+  //   component: Layout,
+  //   redirect: 'noredirect',
+  //   alwaysShow: true,
+  //   name: 'coinManage',
+  //   meta: {
+  //     title: '充提管理',
+  //     icon: 'chart'
+  //   },
+  //   children: [
+  //     {
+  //       path: 'coin',
+  //       component: () => import('@/views/coin/coinReview'),
+  //       name: 'coin',
+  //       meta: {
+  //         perms: ['GET /admin/user/list'],
+  //         title: '提币审核',
+  //         noCache: true
+  //       }
+  //     },
+  //     {
+  //       path: 'coinHistory',
+  //       component: () => import('@/views/coin/coinHistory'),
+  //       name: 'coinHistory',
+  //       meta: {
+  //         perms: ['GET /admin/address/list'],
+  //         title: '历史提币',
+  //         noCache: true
+  //       }
+  //     },
+  //     {
+  //       path: 'coinUnusal',
+  //       component: () => import('@/views/coin/coinUnusal'),
+  //       name: 'coinUnusal',
+  //       meta: {
+  //         perms: ['GET /admin/collect/list'],
+  //         title: '异常提币',
+  //         noCache: true
+  //       }
+  //     }
+  //   ]
+  // },
+  // {
+  //   path: '/trade',
+  //   component: Layout,
+  //   redirect: 'noredirect',
+  //   alwaysShow: true,
+  //   name: 'tradeManage',
+  //   meta: {
+  //     title: '法币交易',
+  //     icon: 'chart'
+  //   },
+  //   children: [
+  //     {
+  //       path: 'trade',
+  //       component: () => import('@/views/trade/tradeReview'),
+  //       name: 'trade',
+  //       meta: {
+  //         perms: ['GET /admin/user/list'],
+  //         title: '提币审核',
+  //         noCache: true
+  //       }
+  //     },
+  //     {
+  //       path: 'tradeHistory',
+  //       component: () => import('@/views/trade/tradeHistory'),
+  //       name: 'tradeHistory',
+  //       meta: {
+  //         perms: ['GET /admin/address/list'],
+  //         title: '历史订单',
+  //         noCache: true
+  //       }
+  //     },
+  //     {
+  //       path: 'tradeUnusal',
+  //       component: () => import('@/views/trade/tradeUnusal'),
+  //       name: 'tradeUnusal',
+  //       meta: {
+  //         perms: ['GET /admin/collect/list'],
+  //         title: '异常订单',
+  //         noCache: true
+  //       }
+  //     },
+  //     {
+  //       path: 'tradeInformation',
+  //       component: () => import('@/views/trade/tradeInformation'),
+  //       name: 'tradeInformation',
+  //       meta: {
+  //         perms: ['GET /admin/collect/list'],
+  //         title: '支付信息',
+  //         noCache: true
+  //       }
+  //     }
+  //   ]
+  // },
   {
     path: '/user',
     component: Layout,
