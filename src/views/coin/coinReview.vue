@@ -33,7 +33,20 @@
             size="mini"
             @click="handleDetail(scope.row)"
           >详情</el-button>
-          <el-button type="primary" size="mini">审核</el-button>
+          <el-button
+            v-permission="['POST /admin/order/ship']"
+            v-if="scope.row.orderStatus==201"
+            type="primary"
+            size="mini"
+            @click="handleShip(scope.row)"
+          >重审</el-button>
+          <el-button
+            v-permission="['POST /admin/order/refund']"
+            v-if="scope.row.orderStatus==202"
+            type="primary"
+            size="mini"
+            @click="handleRefund(scope.row)"
+          >退款</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -103,11 +116,38 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+
+    <!-- 发货对话框 -->
+    <el-dialog :visible.sync="shipDialogVisible" width="600px" title="重审处理">
+      <el-form
+        ref="shipForm"
+        :model="shipForm"
+        status-icon
+        label-position="left"
+        label-width="100px"
+        style="width: 400px; margin-left:50px;"
+      >
+        <el-form-item label="公积金地址" prop="shipChannel">
+          <el-select v-model="value" placeholder="请选择">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="success" icon="el-icon-check" @click="shipDialogVisible = false">重审通过</el-button>
+        <el-button type="danger" icon="el-icon-close" @click="confirmShip">重审拒绝</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listOrder, detailOrder } from '@/api/order';
+import { listOrder, shipOrder, detailOrder } from '@/api/order';
 import Pagination from '@/components/Pagination'; // Secondary package based on el-pagination
 import checkPermission from '@/utils/permission'; // 权限判断函数
 
@@ -151,7 +191,36 @@ export default {
         order: {},
         user: {},
         orderGoods: []
-      }
+      },
+      shipForm: {
+        orderId: undefined,
+        shipChannel: undefined,
+        shipSn: undefined
+      },
+      shipDialogVisible: false,
+      options: [
+        {
+          value: '选项1',
+          label: '黄金糕'
+        },
+        {
+          value: '选项2',
+          label: '双皮奶'
+        },
+        {
+          value: '选项3',
+          label: '蚵仔煎'
+        },
+        {
+          value: '选项4',
+          label: '龙须面'
+        },
+        {
+          value: '选项5',
+          label: '北京烤鸭'
+        }
+      ],
+      value: ''
     };
   },
   created() {
@@ -173,12 +242,42 @@ export default {
           this.listLoading = false;
         });
     },
-
     handleDetail(row) {
       detailOrder(row.id).then(response => {
         this.orderDetail = response.data.data;
       });
       this.orderDialogVisible = true;
+    },
+    handleShip(row) {
+      this.shipForm.orderId = row.id;
+      this.shipForm.shipChannel = row.shipChannel;
+      this.shipForm.shipSn = row.shipSn;
+
+      this.shipDialogVisible = true;
+      this.$nextTick(() => {
+        this.$refs['shipForm'].clearValidate();
+      });
+    },
+    confirmShip() {
+      this.$refs['shipForm'].validate(valid => {
+        if (valid) {
+          shipOrder(this.shipForm)
+            .then(response => {
+              this.shipDialogVisible = false;
+              this.$notify.success({
+                title: '成功',
+                message: '确认发货成功'
+              });
+              this.getList();
+            })
+            .catch(response => {
+              this.$notify.error({
+                title: '失败',
+                message: response.data.errmsg
+              });
+            });
+        }
+      });
     }
   }
 };

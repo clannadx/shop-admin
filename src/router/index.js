@@ -568,6 +568,16 @@ export const asyncRouterMap = [
         }
       },
       {
+        path: 'address',
+        component: () => import('@/views/config/address'),
+        name: 'configAddress',
+        meta: {
+          perms: ['GET /admin/config/order', 'POST /admin/config/order'],
+          title: '公积金地址配置',
+          noCache: true
+        }
+      },
+      {
         path: 'wx',
         component: () => import('@/views/config/wx'),
         name: 'configWx',
