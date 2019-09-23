@@ -106,7 +106,8 @@
 </template>
 
 <script>
-import { listOrder, detailOrder } from '@/api/order';
+// import { listOrder, detailOrder } from '@/api/order';
+import { orderEtm, orderEtmDetail } from '@/api/currency';
 import Pagination from '@/components/Pagination'; // Secondary package based on el-pagination
 import checkPermission from '@/utils/permission'; // 权限判断函数
 
@@ -160,8 +161,9 @@ export default {
     checkPermission,
     getList() {
       this.listLoading = true;
-      listOrder(this.listQuery)
+      orderEtm(this.listQuery)
         .then(response => {
+          console.log(response);
           this.list = response.data.data.list;
           this.total = response.data.data.total;
           this.listLoading = false;
@@ -173,7 +175,7 @@ export default {
         });
     },
     handleDetail(row) {
-      detailOrder(row.id).then(response => {
+      orderEtmDetail(row.id).then(response => {
         this.orderDetail = response.data.data;
       });
       this.orderDialogVisible = true;
