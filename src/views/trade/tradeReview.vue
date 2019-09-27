@@ -10,29 +10,30 @@
       highlight-current-row
     >
       <el-table-column align="center" min-width="100" label="订单编号" prop="orderSn" />
-
       <el-table-column align="center" label="用户ID" prop="userId" />
-
       <el-table-column align="center" label="订单状态" prop="orderStatus">
         <template slot-scope="scope">
           <el-tag>{{ scope.row.orderStatus | orderStatusFilter }}</el-tag>
         </template>
       </el-table-column>
-
-      <el-table-column align="center" label="订单金额" prop="orderPrice" />
-
-      <el-table-column align="center" label="支付金额" prop="actualPrice" />
-
+      <el-table-column align="center" label="订单单价" prop="price" />
+      <el-table-column align="center" label="订单数量" prop="size" />
+      <el-table-column align="center" label="支付金额" prop="cost" />
       <el-table-column align="center" label="支付时间" prop="payTime" />
-
       <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
+          <!-- <el-button
+            v-permission="['GET /admin/order/detail']"
+            type="primary"
+            size="mini"
+            @click="review(scope.row)"
+          >审核</el-button>-->
           <el-button
             v-permission="['GET /admin/order/detail']"
             type="primary"
             size="mini"
             @click="handleDetail(scope.row)"
-          >详情</el-button>
+          >审核</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -49,77 +50,50 @@
     <el-dialog :visible.sync="orderDialogVisible" title="订单详情" width="800">
       <el-form :data="orderDetail" label-position="left">
         <el-form-item label="订单编号">
-          <span>{{ orderDetail.order.orderSn }}</span>
+          <span>{{ orderDetail.orderSn }}</span>
         </el-form-item>
         <el-form-item label="订单状态">
-          <el-tag>{{ orderDetail.order.orderStatus | orderStatusFilter }}</el-tag>
-        </el-form-item>
-        <el-form-item label="订单用户">
-          <span>{{ orderDetail.user.nickname }}</span>
-        </el-form-item>
-        <el-form-item label="用户留言">
-          <span>{{ orderDetail.order.message }}</span>
-        </el-form-item>
-        <el-form-item label="收货信息">
-          <span>（收货人）{{ orderDetail.order.consignee }}</span>
-          <span>（手机号）{{ orderDetail.order.mobile }}</span>
-          <span>（地址）{{ orderDetail.order.address }}</span>
-        </el-form-item>
-        <el-form-item label="商品信息">
-          <el-table :data="orderDetail.orderGoods" border fit highlight-current-row>
-            <el-table-column align="center" label="商品名称" prop="goodsName" />
-            <el-table-column align="center" label="商品编号" prop="goodsSn" />
-            <el-table-column align="center" label="货品规格" prop="specifications" />
-            <el-table-column align="center" label="货品价格" prop="price" />
-            <el-table-column align="center" label="货品数量" prop="number" />
-            <el-table-column align="center" label="货品图片" prop="picUrl">
-              <template slot-scope="scope">
-                <img :src="scope.row.picUrl" width="40" >
-              </template>
-            </el-table-column>
-          </el-table>
+          <el-tag>{{ orderDetail.orderStatus | orderStatusFilter }}</el-tag>
         </el-form-item>
         <el-form-item label="费用信息">
           <span>
-            (实际费用){{ orderDetail.order.actualPrice }}元 =
-            (商品总价){{ orderDetail.order.goodsPrice }}元 +
-            (快递费用){{ orderDetail.order.freightPrice }}元 -
-            (优惠减免){{ orderDetail.order.couponPrice }}元 -
-            (积分减免){{ orderDetail.order.integralPrice }}元
+            (实际费用){{ orderDetail.cost }} 元 =
+            (单价){{ orderDetail.price }} USDT *
+            (数量){{ orderDetail.size }} 个
           </span>
         </el-form-item>
         <el-form-item label="支付信息">
-          <span>（支付渠道）ETM</span>
-          <span>（支付时间）{{ orderDetail.order.payTime }}</span>
-        </el-form-item>
-        <el-form-item label="快递信息">
-          <span>（快递公司）{{ orderDetail.order.shipChannel }}</span>
-          <span>（快递单号）{{ orderDetail.order.shipSn }}</span>
-          <span>（发货时间）{{ orderDetail.order.shipTime }}</span>
-        </el-form-item>
-        <el-form-item label="收货信息">
-          <span>（确认收货时间）{{ orderDetail.order.confirmTime }}</span>
+          <span>（支付渠道）快捷交易</span>
+          <span>（支付时间）{{ orderDetail.payTime }}</span>
         </el-form-item>
       </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="success" icon="el-icon-check" @click="_passReview(orderDetail.id)">审核通过</el-button>
+        <el-button type="danger" icon="el-icon-close" @click="_rejectReview(orderDetail.id)">审核拒绝</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listOrder, detailOrder } from '@/api/order';
+// import { listOrder, detailOrder } from '@/api/order';
+import {
+  orderEtm,
+  orderEtmDetail,
+  passReview,
+  rejectReview
+} from '@/api/currency';
 import Pagination from '@/components/Pagination'; // Secondary package based on el-pagination
 import checkPermission from '@/utils/permission'; // 权限判断函数
 
 const statusMap = {
   101: '未付款',
-  102: '用户取消',
+  102: '取消订单',
   103: '系统取消',
-  201: '已付款',
-  202: '申请退款',
-  203: '已退款',
-  301: '已发货',
-  401: '用户收货',
-  402: '系统收货'
+  201: '待审核',
+  301: '已审核',
+  302: '审核未通过',
+  401: '已完成'
 };
 
 export default {
@@ -140,12 +114,18 @@ export default {
         limit: 20,
         id: undefined,
         name: undefined,
-        orderStatusArray: [],
+        orderStatusArray: ['201'],
         sort: 'add_time',
         order: 'desc'
       },
       statusMap,
       orderDialogVisible: false,
+      shipDialogVisible: false,
+      shipForm: {
+        orderId: undefined,
+        shipChannel: undefined,
+        shipSn: undefined
+      },
       orderDetail: {
         order: {},
         user: {},
@@ -160,7 +140,7 @@ export default {
     checkPermission,
     getList() {
       this.listLoading = true;
-      listOrder(this.listQuery)
+      orderEtm(this.listQuery)
         .then(response => {
           this.list = response.data.data.list;
           this.total = response.data.data.total;
@@ -173,10 +153,43 @@ export default {
         });
     },
     handleDetail(row) {
-      detailOrder(row.id).then(response => {
+      orderEtmDetail({ id: row.id }).then(response => {
         this.orderDetail = response.data.data;
       });
       this.orderDialogVisible = true;
+    },
+    review(row) {
+      this.shipDialogVisible = true;
+    },
+    async _passReview(id) {
+      const result = await passReview({ orderId: id });
+      if (result && result.data.errno === 0) {
+        this.orderDialogVisible = false;
+        this.$notify.success({
+          title: '成功',
+          message: '审核通过'
+        });
+      } else if (result && result.data.errno !== 0) {
+        this.$notify.error({
+          title: '失败',
+          message: result.data.errmsg
+        });
+      }
+    },
+    async _rejectReview(id) {
+      const result = await rejectReview({ orderId: id });
+      if (result && result.data.errno === 0) {
+        this.orderDialogVisible = false;
+        this.$notify.success({
+          title: '成功',
+          message: '已驳回'
+        });
+      } else if (result && result.data.errno !== 0) {
+        this.$notify.error({
+          title: '失败',
+          message: result.data.errmsg
+        });
+      }
     }
   }
 };

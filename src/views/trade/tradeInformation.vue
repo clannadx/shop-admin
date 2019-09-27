@@ -7,10 +7,10 @@
         clearable
         class="filter-item"
         style="width: 200px;"
-        placeholder="请输入订单号"
+        placeholder="请输入支付姓名"
       />
       <el-button
-        v-permission="['GET /admin/admin/list']"
+        v-permission="['GET /payee/list']"
         class="filter-item"
         type="primary"
         icon="el-icon-search"
@@ -51,16 +51,10 @@
       <el-table-column align="center" label="账户" prop="username" />
       <el-table-column align="center" label="收款二维码" prop="wepaypic | alipaypic">
         <template slot-scope="scope">
-          <img v-if="scope.row.wepaypic" :src="scope.row.wepaypic" width="80" >
+          <img v-if="scope.row.type === 2" :src="scope.row.wepaypic" width="80" >
           <img v-else :src="scope.row.alipaypic" width="80" >
         </template>
       </el-table-column>
-      <!-- <el-table-column align="center" label="收款二维码" prop="alipaypic">
-        <template slot-scope="scope">
-          <img :src="scope.row.alipaypic" width="40" >
-        </template>
-      </el-table-column> -->
-
       <el-table-column align="center" label="操作" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -99,22 +93,19 @@
         style="width: 400px; margin-left:50px;"
       >
         <el-form-item label="支付类别" prop="type">
-          <el-select v-model="type" placeholder="请选择支付类别">
+          <el-select v-model="dataForm.type" placeholder="请选择支付类别" @change="handleChange">
             <el-option
               v-for="item in options"
-              :key="item.id"
+              :key="item.value"
               :label="item.label"
-              :value= "item.value" />
-            <el-option
-              key="2"
-              label="支付宝"
-              value= "2" />
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="姓名" prop="username">
           <el-input v-model="dataForm.username" placeholder="姓名长度必须6个字符以上" />
         </el-form-item>
-        <el-form-item label="账户" prop="account" >
+        <el-form-item label="账户" prop="account">
           <el-input v-model="dataForm.account" type="text" />
         </el-form-item>
         <el-form-item label="收款二维码" prop="avatar">
@@ -130,16 +121,6 @@
             <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
         </el-form-item>
-        <!-- <el-form-item label="管理员角色" prop="roleIds">
-          <el-select v-model="dataForm.roleIds" multiple placeholder="请选择">
-            <el-option
-              v-for="item in roleOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
@@ -177,14 +158,19 @@
 </style>
 
 <script>
-import { createAccount, payAccountList, updatePayAccount, deletePayAccount } from '@/api/currency';
+import {
+  createAccount,
+  payAccountList,
+  updatePayAccount,
+  deletePayAccount
+} from '@/api/currency';
 import { roleOptions } from '@/api/role';
 import { uploadPath } from '@/api/storage';
 import { getToken } from '@/utils/auth';
 import Pagination from '@/components/Pagination'; // Secondary package based on el-pagination
 const statusMap = {
-  1: '微信支付',
-  2: '支付宝支付'
+  1: '支付宝支付',
+  2: '微信支付'
 };
 export default {
   name: 'Admin',
@@ -196,10 +182,15 @@ export default {
   },
   data() {
     return {
-      type: 1,
       options: [
-        { id: '11', type: 1, label: '微信' },
-        { id: '22', type: 2, label: '支付宝' }
+        {
+          value: 1,
+          label: '支付宝'
+        },
+        {
+          value: 2,
+          label: '微信'
+        }
       ],
       uploadPath,
       list: null,
@@ -214,14 +205,15 @@ export default {
         order: 'desc'
       },
       dataForm: {
-        id: undefined,
-        type: '1',
-        username: undefined,
-        account: undefined,
-        avatar: undefined,
+        account: '',
+        addTime: '',
         alipaypic: '',
-        wepaypic: '',
-        roleIds: []
+        avatar: '',
+        id: undefined,
+        type: 1,
+        updateTime: '',
+        username: '',
+        wepaypic: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -231,7 +223,12 @@ export default {
       },
       rules: {
         username: [
-          { required: true, message: '姓名长度必须6个字符以上', trigger: 'blur' }
+          {
+            required: true,
+            min: 6,
+            message: '姓名长度必须6个字符以上',
+            trigger: 'blur'
+          }
         ],
         account: [{ required: true, message: '账户不能为空', trigger: 'blur' }]
       },
@@ -253,6 +250,13 @@ export default {
     });
   },
   methods: {
+    handleChange(value) {
+      if (value === 1) {
+        this.dataForm.avatar = this.dataForm.wepaypic;
+      } else {
+        this.dataForm.avatar = this.dataForm.alipaypic;
+      }
+    },
     formatRole(roleId) {
       for (let i = 0; i < this.roleOptions.length; i++) {
         if (roleId === this.roleOptions[i].value) {
@@ -281,14 +285,15 @@ export default {
     },
     resetForm() {
       this.dataForm = {
+        account: '',
+        addTime: '',
+        alipaypic: '',
+        avatar: '',
         id: undefined,
-        type: '1',
-        username: undefined,
-        account: undefined,
-        avatar: undefined,
-        alipaypic: undefined,
-        wepaypic: undefined,
-        roleIds: []
+        type: 1,
+        updateTime: '',
+        username: '',
+        wepaypic: ''
       };
     },
     uploadAvatar: function(response) {
@@ -302,44 +307,43 @@ export default {
         this.$refs['dataForm'].clearValidate();
       });
     },
-    createData() {
+    async createAccount(data) {
       try {
-        this.$refs['dataForm'].validate(async valid => {
-          if (valid) {
-            console.log(this.dialogStatus);
-            if (this.type === '1') {
-              this.dataForm.wepaypic = this.dataForm.avatar;
-            } else {
-              this.dataForm.alipaypic = this.dataForm.avatar;
-            }
-            this.dataForm.type = parseInt(this.type);
-            const result = await createAccount(this.dataForm);
-            console.log(result);
-            if (result && result.data.errno === 0) {
-              this.dialogFormVisible = false;
-              this.$notify.success({
-                title: '成功',
-                message: '添加管理员成功'
-              });
-              this.getList();
-            } else if (result && result.data.errno !== 0) {
-              this.$notify.error({
-                title: '失败',
-                message: result.data.errmsg
-              });
-            }
-          }
-        });
+        const result = await createAccount(data);
+        if (result && result.data.errno === 0) {
+          this.dialogFormVisible = false;
+          this.$notify.success({
+            title: '成功',
+            message: '添加付款账号成功'
+          });
+          this.getList();
+        }
       } catch (error) {
-        console.log(error);
+        this.$notify.error({
+          title: '失败',
+          message: error.data.errmsg
+        });
       }
     },
+    createData() {
+      this.$refs['dataForm'].validate(valid => {
+        if (valid) {
+          if (this.dataForm.type === 2) {
+            this.dataForm.wepaypic = this.dataForm.avatar;
+          } else {
+            this.dataForm.alipaypic = this.dataForm.avatar;
+          }
+          this.createAccount(this.dataForm);
+        }
+      });
+    },
     handleUpdate(row) {
-      this.dataForm = Object.assign({}, row);
-      console.log(this.dataForm);
-      const avatar = this.dataForm.alipaypic === '' ? this.dataForm.wepaypic : this.dataForm.alipaypic;
+      this.dataForm = Object.assign({ avatar: '' }, row);
+      const avatar =
+        this.dataForm.type === 2
+          ? this.dataForm.wepaypic
+          : this.dataForm.alipaypic;
       this.dataForm.avatar = avatar;
-      this.type = this.dataForm.type;
       this.dialogStatus = 'update';
       this.dialogFormVisible = true;
       this.$nextTick(() => {
@@ -349,6 +353,11 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
+          if (this.dataForm.type === 2) {
+            this.dataForm.wepaypic = this.dataForm.avatar;
+          } else {
+            this.dataForm.alipaypic = this.dataForm.avatar;
+          }
           updatePayAccount(this.dataForm)
             .then(() => {
               for (const v of this.list) {
@@ -393,14 +402,15 @@ export default {
     handleDownload() {
       this.downloadLoading = true;
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['管理员ID', '管理员名称', '管理员头像'];
-        const filterVal = ['id', 'username', 'avatar'];
-        excel.export_json_to_excel2(
-          tHeader,
-          this.list,
-          filterVal,
-          '管理员信息'
-        );
+        const tHeader = ['ID', '姓名', '账户', '支付宝收款码', '微信收款码'];
+        const filterVal = [
+          'id',
+          'username',
+          'account',
+          'alipaypic',
+          'wepaypic'
+        ];
+        excel.export_json_to_excel2(tHeader, this.list, filterVal, '支付信息');
         this.downloadLoading = false;
       });
     }

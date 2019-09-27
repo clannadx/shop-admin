@@ -138,7 +138,7 @@ export const asyncRouterMap = [
         name: 'trade',
         meta: {
           perms: ['GET /admin/user/list'],
-          title: '提币审核',
+          title: '审核发币',
           noCache: true
         }
       },
