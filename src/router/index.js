@@ -137,8 +137,8 @@ export const asyncRouterMap = [
         component: () => import('@/views/trade/tradeReview'),
         name: 'trade',
         meta: {
-          perms: ['GET /admin/user/list'],
-          title: '审核发币',
+          perms: ['GET /admin/orderetm/list'],
+          title: '待审核订单',
           noCache: true
         }
       },
@@ -147,7 +147,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/trade/tradeHistory'),
         name: 'tradeHistory',
         meta: {
-          perms: ['GET /admin/address/list'],
+          perms: ['GET /admin/orderetm/list'],
           title: '历史订单',
           noCache: true
         }
@@ -157,7 +157,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/trade/tradeUnusal'),
         name: 'tradeUnusal',
         meta: {
-          perms: ['GET /admin/collect/list'],
+          perms: ['GET /admin/orderetm/list'],
           title: '异常订单',
           noCache: true
         }
@@ -167,8 +167,8 @@ export const asyncRouterMap = [
         component: () => import('@/views/trade/tradeInformation'),
         name: 'tradeInformation',
         meta: {
-          perms: ['GET /admin/collect/list'],
-          title: '支付信息',
+          perms: ['GET /admin/payee/list'],
+          title: '支付账号',
           noCache: true
         }
       }

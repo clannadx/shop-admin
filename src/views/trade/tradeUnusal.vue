@@ -10,15 +10,11 @@
       highlight-current-row
     >
       <el-table-column align="center" min-width="100" label="订单编号" prop="orderSn" />
-
-      <el-table-column align="center" label="用户ID" prop="userId" />
-
       <el-table-column align="center" label="订单状态" prop="orderStatus">
         <template slot-scope="scope">
           <el-tag>{{ scope.row.orderStatus | orderStatusFilter }}</el-tag>
         </template>
       </el-table-column>
-
       <el-table-column align="center" label="订单单价" prop="price" />
       <el-table-column align="center" label="订单数量" prop="size" />
       <el-table-column align="center" label="支付金额" prop="cost" />
@@ -26,7 +22,7 @@
       <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
-            v-permission="['GET /admin/order/detail']"
+            v-permission="['GET /admin/orderetm/detail']"
             type="primary"
             size="mini"
             @click="handleDetail(scope.row)"
@@ -47,21 +43,26 @@
     <el-dialog :visible.sync="orderDialogVisible" title="订单详情" width="800">
       <el-form :data="orderDetail" label-position="left">
         <el-form-item label="订单编号">
-          <span>{{ orderDetail.orderSn }}</span>
+          <span>{{ orderDetail.order_sn }}</span>
         </el-form-item>
         <el-form-item label="订单状态">
-          <el-tag>{{ orderDetail.orderStatus | orderStatusFilter }}</el-tag>
+          <el-tag>{{ orderDetail.order_status | orderStatusFilter }}</el-tag>
+        </el-form-item>
+        <el-form-item label="支付渠道">
+          <span>{{ orderDetail.type |orderTypeFilter }}</span>
+        </el-form-item>
+        <el-form-item label="转账订单号">
+          <span>{{ orderDetail.pay_sn }}</span>
         </el-form-item>
         <el-form-item label="费用信息">
           <span>
-            (实际费用){{ orderDetail.cost }} 元 =
-            (单价){{ orderDetail.price }} USDT *
-            (数量){{ orderDetail.size }} 个
+            (实际费用) {{ orderDetail.cost }} 元 =
+            (单价) {{ orderDetail.price }} USDT *
+            (数量) {{ orderDetail.size }} 个
           </span>
         </el-form-item>
-        <el-form-item label="支付信息">
-          <span>（支付渠道）快捷交易</span>
-          <span>（支付时间）{{ orderDetail.updateTime }}</span>
+        <el-form-item label="支付时间">
+          <span>{{ orderDetail.pay_time }}</span>
         </el-form-item>
 
       </el-form>
@@ -83,13 +84,19 @@ const statusMap = {
   302: '审核未通过',
   401: '已完成'
 };
-
+const orderType = {
+  1: '支付宝',
+  2: '微信'
+};
 export default {
   name: 'Order',
   components: { Pagination },
   filters: {
     orderStatusFilter(status) {
       return statusMap[status];
+    },
+    orderTypeFilter(status) {
+      return orderType[status];
     }
   },
   data() {
@@ -102,7 +109,7 @@ export default {
         limit: 20,
         id: undefined,
         name: undefined,
-        orderStatusArray: ['302', '103'],
+        orderStatusArray: ['302'],
         sort: 'add_time',
         order: 'desc'
       },

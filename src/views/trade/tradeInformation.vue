@@ -10,14 +10,14 @@
         placeholder="请输入支付姓名"
       />
       <el-button
-        v-permission="['GET /payee/list']"
+        v-permission="['GET /admin/payee/list']"
         class="filter-item"
         type="primary"
         icon="el-icon-search"
         @click="handleFilter"
       >查找</el-button>
       <el-button
-        v-permission="['POST /payee/create']"
+        v-permission="['POST /admin/payee/create']"
         class="filter-item"
         type="primary"
         icon="el-icon-edit"
@@ -58,13 +58,13 @@
       <el-table-column align="center" label="操作" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
-            v-permission="['POST /admin/admin/update']"
+            v-permission="['POST /admin/payee/update']"
             type="primary"
             size="mini"
             @click="handleUpdate(scope.row)"
           >编辑</el-button>
           <el-button
-            v-permission="['POST /admin/admin/delete']"
+            v-permission="['POST /admin/payee/delete']"
             type="danger"
             size="mini"
             @click="handleDelete(scope.row)"
@@ -251,7 +251,7 @@ export default {
   },
   methods: {
     handleChange(value) {
-      if (value === 1) {
+      if (value === 2) {
         this.dataForm.avatar = this.dataForm.wepaypic;
       } else {
         this.dataForm.avatar = this.dataForm.alipaypic;
