@@ -8,14 +8,14 @@
         <span class="svg-container svg-container_login">
           <svg-icon icon-class="user" />
         </span>
-        <el-input v-model="loginForm.username" name="username" type="text" auto-complete="on" placeholder="username" />
+        <el-input v-model="loginForm.username" name="username" type="text" auto-complete="on" placeholder="管理员用户名" />
       </el-form-item>
 
       <el-form-item prop="password">
         <span class="svg-container">
           <svg-icon icon-class="password" />
         </span>
-        <el-input :type="passwordType" v-model="loginForm.password" name="password" auto-complete="on" placeholder="password" @keyup.enter.native="handleLogin" />
+        <el-input :type="passwordType" v-model="loginForm.password" name="password" auto-complete="on" placeholder="管理员密码" @keyup.enter.native="handleLogin" />
         <span class="show-pwd" @click="showPwd">
           <svg-icon icon-class="eye" />
         </span>
@@ -55,8 +55,8 @@ export default {
     };
     return {
       loginForm: {
-        username: 'admin123',
-        password: 'admin123'
+        username: '',
+        password: ''
       },
       loginRules: {
         username: [{ required: true, message: '管理员账户不允许为空', trigger: 'blur' }],
