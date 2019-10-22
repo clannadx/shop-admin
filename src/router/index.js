@@ -259,15 +259,15 @@ export const asyncRouterMap = [
       icon: 'chart'
     },
     children: [
-      {
-        path: 'region',
-        component: () => import('@/views/mall/region'),
-        name: 'region',
-        meta: {
-          title: '行政区域',
-          noCache: true
-        }
-      },
+      // {
+      //   path: 'region',
+      //   component: () => import('@/views/mall/region'),
+      //   name: 'region',
+      //   meta: {
+      //     title: '行政区域',
+      //     noCache: true
+      //   }
+      // },
       {
         path: 'brand',
         component: () => import('@/views/mall/brand'),
